@@ -11,6 +11,10 @@ Arquitectura, patrones de diseño, catálogo de mensajes `postMessage`, comandos
 - `src/infrastructure/` — adaptadores del puerto (`ReduxSavingsGoalRepository`, `InMemorySavingsGoalRepository`), el store de Redux y el contrato `postMessage` (`webMessages.ts`).
 - `src/presentation/` — pantallas, hooks y componentes RN.
 
+## Demo
+
+Video funcional en Android y iOS: [`docs/media/demo-android.mp4`](docs/media/demo-android.mp4), [`docs/media/demo-ios.mp4`](docs/media/demo-ios.mp4). Detalle en el [README raíz](../README.md#demo).
+
 ## Tests
 
 ```sh
