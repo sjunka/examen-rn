@@ -42,10 +42,22 @@ Requiere un emulador o dispositivo Android corriendo (`adb devices` debe listarl
 
 ## Demo
 
-Video funcional de las 4 HUs (listado con progreso, detalle + abono en WebView, actualización sin recargar, diálogo de confirmación y notificación al completar meta) corriendo en `mobile/` sobre simulador/emulador real:
+Las 4 HUs (listado con progreso, detalle + abono en WebView, diálogo de
+confirmación, actualización sin recargar) corriendo en `mobile/` sobre
+simulador/emulador real:
 
-- [Demo Android](mobile/docs/media/demo-android.mp4) — emulador Pixel (API 36).
-- [Demo iOS](mobile/docs/media/demo-ios.mp4) — simulador iPhone 17 Pro (iOS 26.5).
+<p align="center">
+  <img src="mobile/docs/media/demo-android.gif" width="260" alt="Demo Android: listado de metas, abono a Viaje a Cartagena y diálogo de confirmación" />
+  <img src="mobile/docs/media/demo-ios.gif" width="260" alt="Demo iOS: listado de metas y detalle de Viaje a Cartagena" />
+</p>
+
+> ¿Prefieres video? [Android (MP4)](mobile/docs/media/demo-android.mp4) ·
+> [iOS (MP4)](mobile/docs/media/demo-ios.mp4)
+
+| | Listado | Detalle / abono |
+|---|---|---|
+| **Android** | <img src="mobile/docs/media/screenshot-android-list.png" width="220" alt="Listado de metas en Android" /> | <img src="mobile/docs/media/screenshot-android-detail.png" width="220" alt="Detalle y abono en Android" /> |
+| **iOS** | <img src="mobile/docs/media/screenshot-ios-list.png" width="220" alt="Listado de metas en iOS" /> | <img src="mobile/docs/media/screenshot-ios-detail.png" width="220" alt="Detalle y abono en iOS" /> |
 
 ## Arquitectura
 
