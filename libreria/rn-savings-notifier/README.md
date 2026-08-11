@@ -1,9 +1,8 @@
 # rn-savings-notifier
 
 Diálogo de confirmación nativo del sistema y notificación local para metas
-de ahorro cumplidas, con puente TurboModule. Implementación real solo en
-iOS (Swift); Android queda documentado como pendiente (ver
-[Pendientes](#pendientes)).
+de ahorro cumplidas, con puente TurboModule. Implementación real en iOS
+(Swift) y Android (Kotlin).
 
 ## Instalación
 
@@ -42,10 +41,11 @@ import { showConfirmDialog, notifyGoalCompleted } from 'rn-savings-notifier';
 ### `showConfirmDialog(title: string, message: string): Promise<boolean>`
 
 Abre el diálogo de confirmación **nativo del sistema** (`UIAlertController`
-en iOS, no el `Alert` de React Native) con un botón "Cancelar" y uno
-"Aceptar". Resuelve `true` si el usuario acepta, `false` si cancela. Solo
-rechaza ante un error real — por ejemplo, si no hay ningún
-`UIViewController` visible desde el que presentar el diálogo — nunca por
+en iOS, `AlertDialog` en Android — nunca el `Alert` de React Native) con un
+botón "Cancelar" y uno "Aceptar". Resuelve `true` si el usuario acepta,
+`false` si cancela. Solo rechaza ante un error real — por ejemplo, si no
+hay ningún `UIViewController`/`Activity` visible desde el que presentar el
+diálogo (`NO_VIEW_CONTROLLER` en iOS, `NO_ACTIVITY` en Android) — nunca por
 la elección del usuario.
 
 `title` y `message` deben ser strings no vacíos (ni solo espacios); de lo
@@ -59,10 +59,13 @@ nunca resolvería.
 
 ### `notifyGoalCompleted(goalName: string): Promise<void>`
 
-Dispara una notificación local nativa cuyo cuerpo menciona `goalName`. La
-notificación se muestra **incluso con la app en primer plano**, gracias a
-que la librería registra su propio `UNUserNotificationCenterDelegate` (ver
+Dispara una notificación local nativa cuyo cuerpo menciona `goalName`. En
+iOS se muestra **incluso con la app en primer plano**, gracias a que la
+librería registra su propio `UNUserNotificationCenterDelegate` (ver
 [Comportamiento del permiso de notificaciones](#comportamiento-del-permiso-de-notificaciones)).
+En Android se publica vía `NotificationManager` en un canal propio del
+paquete (`rn-savings-notifier-goal-completed`, creado en el primer envío
+para API 26+).
 
 `goalName` debe ser un string no vacío; si no lo es, la promesa rechaza
 con un `TypeError` sin llegar a tocar el nativo.
@@ -76,14 +79,18 @@ reemplazarlo — `UNUserNotificationCenter` solo admite un delegate a la vez.
 ## Comportamiento del permiso de notificaciones
 
 La primera vez que se llama a `notifyGoalCompleted`, la librería solicita
-autorización de notificaciones (`UNAuthorizationOptions: [.alert, .sound,
-.badge]`) si el usuario todavía no respondió. El comportamiento según la
+autorización de notificaciones si el usuario todavía no respondió —
+`UNAuthorizationOptions: [.alert, .sound, .badge]` en iOS,
+`POST_NOTIFICATIONS` en Android 13+ (versiones previas no requieren este
+permiso en tiempo de ejecución; se comprueba igual que el usuario no lo
+haya desactivado a nivel de sistema). El comportamiento según la
 respuesta:
 
 | Estado del permiso | Comportamiento |
 | --- | --- |
 | Concedido (ahora o antes) | Se programa y muestra la notificación. La promesa resuelve. |
 | Denegado (ahora o antes) | **No** se programa ninguna notificación. La promesa **resuelve igual** (no rechaza) — la meta se cumplió de todas formas; la notificación es un canal de aviso, no una condición de éxito de la operación. |
+| Sin `Activity`/`UIViewController` visible desde el que pedir el permiso | Mismo comportamiento que denegado: resuelve en silencio. |
 | Error real del sistema al programar | La promesa rechaza con el código `NOTIFICATION_SCHEDULE_FAILED`. |
 
 Se decidió que un permiso denegado resuelva en lugar de rechazar porque
@@ -127,7 +134,13 @@ botones, uno por método, con el resultado mostrado en pantalla.
   promesa del diálogo resolviendo tanto aceptación como cancelación.
 - **App de ejemplo**: `yarn example ios` (o `yarn example android`) levanta
   `example/`, una app RN independiente con este paquete linkeado por
-  workspace, para probar los dos métodos contra un simulador real.
+  workspace, para probar los dos métodos contra un simulador/emulador real.
+- **Sin tests unitarios de Kotlin**: la lógica de `AlertDialog` y
+  `NotificationManager` no tiene test unitario propio — requeriría
+  Robolectric (una dependencia nueva) para correr fuera de un
+  emulador/dispositivo. Queda cubierta por la app de ejemplo en
+  `example android`; añadir Robolectric si el equipo necesita cobertura
+  automatizada de esta capa.
 - **Publicación**: el paquete está andamiado con `react-native-builder-bob`
   (`yarn prepare` corre `bob build`, generando `lib/module` y
   `lib/typescript` a partir de `src/`). Publicar sería `npm publish` desde
@@ -148,17 +161,18 @@ botones, uno por método, con el resultado mostrado en pantalla.
 - `ios/RnSavingsNotifierImpl.swift` — la lógica real: `UIAlertController`
   para el diálogo, `UNUserNotificationCenter` para la notificación, y el
   `UNUserNotificationCenterDelegate` que vive en la librería.
+- `android/src/main/java/com/rnsavingsnotifier/RnSavingsNotifierModule.kt`
+  — la lógica real: `AlertDialog` para el diálogo,
+  `NotificationManager`/`NotificationChannel` para la notificación, y el
+  flujo de permiso en tiempo de ejecución (`PermissionAwareActivity`) para
+  `POST_NOTIFICATIONS` en Android 13+.
+- `android/src/main/java/com/rnsavingsnotifier/RnSavingsNotifierPackage.kt`
+  — registra el módulo ante React Native (autolinking).
+- `android/src/main/AndroidManifest.xml` — declara `POST_NOTIFICATIONS`
+  para que se fusione en el manifest de la app consumidora.
 
 ## Pendientes
 
-- **Android**: el spec de codegen ya cubre ambas plataformas
-  (`RnSavingsNotifierModule.kt` existe y compila), pero los dos métodos
-  rechazan con `NOT_IMPLEMENTED`. La razón es de alcance: el examen pide
-  demo en iOS (ver `README.md` y `PRODUCT.md` en la raíz del repo), y
-  reproducir diálogo del sistema + notificación local en Kotlin
-  (`AlertDialog` + `NotificationManager`/`NotificationChannel`) es trabajo
-  nuevo, no una adaptación menor. Se documenta como conocido en lugar de
-  dejarlo fallar en silencio.
 - **`pod install` en este entorno**: el directorio del proyecto contiene un
   espacio (`.../react native/examen-rn/...`). El descargador de binarios
   prebuilt de React Native 0.85 (`RCTUsePrebuiltRNCore`) construye una URL
