@@ -8,7 +8,8 @@ artefacto verificable del propio repositorio (archivo, línea, commit, ADR)
 ## Proceso
 
 El desarrollo siguió el flujo que declara `CLAUDE.md` en la raíz: issues de
-GitHub por historia de usuario (`gh issue list`, ver `#5`–`#8` para HU1–HU4),
+GitHub por historia de usuario (`gh issue list`, ver `#4` HU1, `#5` HU2,
+`#6` HU3, `#8` HU4 — `#7` es la librería, capa aparte),
 etiquetadas `ready-for-agent`, cada una implementada con el skill
 `/mattpocock-skills:implement` — construir en los seams con TDD, typecheck y
 suite completa antes de cerrar, `/code-review` antes de commitear. Este

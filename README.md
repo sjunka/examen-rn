@@ -70,7 +70,14 @@ La micro-app llega al WebView como HTML embebido (`source={{ html }}`), no por r
 
 ## Uso de IA
 
-<!-- Skills y agents usados, link a docs/ia/USO_IA.md de cada paquete. -->
+Cada capa evaluada tiene su propio skill y agent, y su propio documento de
+uso de IA — qué generó la IA, qué se ajustó a mano, y casos concretos y
+verificables de qué se rechazó o corrigió durante el desarrollo:
+
+- [`mobile/docs/ia/USO_IA.md`](mobile/docs/ia/USO_IA.md) — skill
+  `add-application-use-case`, agent `hexagonal-boundary-guardian`.
+- [`libreria/rn-savings-notifier/docs/ia/USO_IA.md`](libreria/rn-savings-notifier/docs/ia/USO_IA.md)
+  — skill `add-native-capability`, agent `capability-contract-checker`.
 
 ## Decisiones técnicas
 

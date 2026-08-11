@@ -45,7 +45,9 @@ el mismo flujo que `mobile/`: ticket de GitHub (`#7`), `/mattpocock-skills:imple
 ## Qué se rechazó o corrigió (casos concretos y verificables)
 
 1. **TurboModule sobre NativeModule — alternativa descartada y
-   documentada en el ADR.** `docs/adr/0001-...md` registra por qué se
+   documentada en el ADR.** El ADR de la raíz del repo
+   (`docs/adr/0001-turbomodule-vs-nativemodule-rn-savings-notifier.md`)
+   registra por qué se
    rechazó `RCTBridgeModule`/`@ReactMethod` con tipos `any`: sin seguridad
    de tipos de punta a punta, y RN 0.87 trae Fabric/TurboModules por
    defecto — construir NativeModule legacy habría sido nadar contra la
