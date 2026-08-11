@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewMessageEvent } from 'react-native-webview';
 import { showConfirmDialog, notifyGoalCompleted } from 'rn-savings-notifier';
 import { formatCOP } from '../../domain';
