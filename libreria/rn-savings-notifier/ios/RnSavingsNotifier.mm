@@ -1,5 +1,12 @@
 #import "RnSavingsNotifier.h"
 
+// RnSavingsNotifierImpl.swift conforma UNUserNotificationCenterDelegate, así
+// que el header generado por Swift (más abajo) referencia ese protocolo y
+// UNNotificationPresentationOptions. El generador no se hace cargo de
+// importar el framework por nosotros — sin esto el build falla con "cannot
+// find protocol declaration for 'UNUserNotificationCenterDelegate'".
+#import <UserNotifications/UserNotifications.h>
+
 // Header generado por Swift a partir de RnSavingsNotifierImpl.swift. El
 // nombre coincide con el módulo del pod ("RnSavingsNotifier"). Toda la
 // lógica vive en Swift; esta clase es solo el glue que exige el codegen de

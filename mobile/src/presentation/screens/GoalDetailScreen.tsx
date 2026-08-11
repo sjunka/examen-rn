@@ -1,6 +1,8 @@
 import { useCallback, useRef } from 'react';
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import WebView, { type WebViewMessageEvent } from 'react-native-webview';
+import { showConfirmDialog, notifyGoalCompleted } from 'rn-savings-notifier';
+import { formatCOP } from '../../domain';
 import { webAppSource } from '../../infrastructure/webAppHtml';
 import { parseWebToNativeMessage, type NativeToWebMessage } from '../../infrastructure/webMessages';
 import { useConfirmDeposit } from '../useConfirmDeposit';
@@ -19,6 +21,36 @@ export function GoalDetailScreen({
   // Explicit `{}` type arg: react-native-webview's WebView<P = undefined>
   // makes TS infer `never` for props otherwise (WebViewProps & undefined).
   const webViewRef = useRef<WebView<{}>>(null);
+
+  // DEPOSIT_CONFIRMED composition: the native confirmation dialog gates the
+  // use case — a cancel resolves false and this stops here, so nothing is
+  // dispatched and no state changes. Only past that gate does it reach
+  // confirmDeposit, never straight into Redux. A non-existent goal id is a
+  // no-op there — confirmDeposit leaves global state untouched.
+  const handleDepositConfirmed = useCallback(
+    async (depositGoalId: string, amount: number) => {
+      if (!goal) {
+        return;
+      }
+      const accepted = await showConfirmDialog(
+        '¿Confirmar abono?',
+        `Se abonará ${formatCOP(amount)} a "${goal.name}".`,
+      );
+      if (!accepted) {
+        return;
+      }
+
+      const result = confirmDeposit(depositGoalId, amount);
+      // The domain's transition rule (isGoalCompleted comparing raw
+      // amounts, via justCompleted) decides the trigger, not the rounded
+      // percentage — and only fires on the deposit that crosses the line,
+      // never again on a later deposit to an already-complete goal.
+      if (result?.justCompleted) {
+        await notifyGoalCompleted(goal.name);
+      }
+    },
+    [goal, confirmDeposit],
+  );
 
   // parseWebToNativeMessage is the only thing here that knows the raw wire
   // format — everything past it works with the typed union.
@@ -49,14 +81,11 @@ export function GoalDetailScreen({
         return;
       }
 
-      // DEPOSIT_CONFIRMED: dispatched through the use case, never straight
-      // into Redux. A non-existent goal id is a no-op — confirmDeposit
-      // leaves global state untouched. GoalsScreen re-renders on its own
-      // subscription; this screen deliberately doesn't, so the WebView
-      // never remounts.
-      confirmDeposit(message.payload.goalId, message.payload.amount);
+      // GoalsScreen re-renders on its own subscription; this screen
+      // deliberately doesn't, so the WebView never remounts.
+      handleDepositConfirmed(message.payload.goalId, message.payload.amount);
     },
-    [goal, confirmDeposit],
+    [goal, handleDepositConfirmed],
   );
 
   return (
