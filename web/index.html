@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Detalle de meta</title>
+    <style>
+      /* Design tokens mirrored from /DESIGN.md, same subset as
+         mobile/src/presentation/theme.ts — kept in sync by hand since the
+         web micro-app has no build step to share a module with mobile/. */
+      :root {
+        --color-canvas: #7a8aba;
+        --color-chrome-indigo: #3d4f97;
+        --color-platinum: #dedede;
+        --color-surface: #ffffff;
+        --color-carbon: #21242e;
+        --color-signal: #f68d1f;
+        --color-ink: #21242e;
+        --color-ink-soft: #3d4f97;
+        --color-on-primary: #ffffff;
+        --color-error: #e60012;
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 12px;
+        --space-lg: 16px;
+        --space-xl: 24px;
+        --rounded-xs: 2px;
+        --rounded-sm: 4px;
+        --rounded-md: 6px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background-color: var(--color-canvas);
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--color-ink);
+        padding: var(--space-lg);
+      }
+
+      .ui-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .body-text {
+        font-size: 12px;
+        font-weight: 400;
+      }
+
+      .link-text {
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      #loading {
+        color: var(--color-on-primary);
+      }
+
+      .card {
+        background-color: var(--color-platinum);
+        border: 1px solid var(--color-chrome-indigo);
+        border-radius: var(--rounded-md);
+        padding: var(--space-lg);
+      }
+
+      .card + .card {
+        margin-top: var(--space-lg);
+      }
+
+      .goal-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-ink-soft);
+        margin: 0 0 var(--space-sm);
+      }
+
+      .amount-row {
+        margin-bottom: var(--space-xs);
+      }
+
+      .amount-row .value {
+        font-weight: 700;
+      }
+
+      .progress-track {
+        height: 8px;
+        background-color: var(--color-surface);
+        border-radius: var(--rounded-xs);
+        overflow: hidden;
+        margin: var(--space-sm) 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background-color: var(--color-signal);
+      }
+
+      #goal-percent {
+        display: block;
+      }
+
+      label {
+        display: block;
+        margin-bottom: var(--space-xs);
+      }
+
+      input[type='number'] {
+        width: 100%;
+        height: 32px;
+        padding: 0 var(--space-sm);
+        border: 1px solid var(--color-chrome-indigo);
+        border-radius: var(--rounded-xs);
+        background-color: var(--color-surface);
+        color: var(--color-ink);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+      }
+
+      button {
+        margin-top: var(--space-md);
+        width: 100%;
+        height: 36px;
+        border: none;
+        border-radius: var(--rounded-xs);
+        background-color: var(--color-signal);
+        color: var(--color-on-primary);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      #form-error {
+        color: var(--color-error);
+        margin-top: var(--space-sm);
+      }
+
+      #confirmation {
+        color: var(--color-ink-soft);
+        margin-top: var(--space-sm);
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="loading" class="ui-label">Cargando meta&hellip;</p>
+
+    <section class="card" id="goal-card" hidden>
+      <p class="link-text goal-name" id="goal-name"></p>
+      <p class="body-text amount-row">
+        Objetivo: <span class="value" id="goal-target"></span>
+      </p>
+      <p class="body-text amount-row">
+        Acumulado: <span class="value" id="goal-accumulated"></span>
+      </p>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <span class="ui-label" id="goal-percent"></span>
+    </section>
+
+    <section class="card" id="deposit-form-card" hidden>
+      <form id="deposit-form">
+        <label class="ui-label" for="amount-input">Monto a abonar</label>
+        <input id="amount-input" type="number" inputmode="numeric" min="1" step="1" />
+        <button type="submit" class="ui-label">Abonar</button>
+      </form>
+      <p class="body-text" id="form-error" hidden></p>
+      <p class="body-text" id="confirmation" hidden></p>
+    </section>
+
+    <script>
+      (function () {
+        var currentGoal = null;
+
+        function postToNative(message) {
+          if (typeof window.ReactNativeWebView !== 'undefined') {
+            window.ReactNativeWebView.postMessage(JSON.stringify(message));
+          }
+        }
+
+        function formatCOP(amount) {
+          return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            maximumFractionDigits: 0,
+          }).format(amount);
+        }
+
+        // Mirrors mobile/src/domain/progress.ts calculateProgress: rounds,
+        // saturates at 100, invalid target -> 0.
+        function calculateProgress(accumulated, target) {
+          if (target <= 0) {
+            return 0;
+          }
+          return Math.min(100, Math.round((accumulated / target) * 100));
+        }
+
+        function renderGoal(goal) {
+          currentGoal = goal;
+          document.getElementById('loading').hidden = true;
+          document.getElementById('goal-name').textContent = goal.name;
+          document.getElementById('goal-target').textContent = formatCOP(goal.targetAmount);
+          document.getElementById('goal-accumulated').textContent = formatCOP(
+            goal.accumulatedAmount,
+          );
+          var percent = calculateProgress(goal.accumulatedAmount, goal.targetAmount);
+          document.getElementById('goal-percent').textContent = percent + '%';
+          document.getElementById('progress-fill').style.width = percent + '%';
+          document.getElementById('goal-card').hidden = false;
+          document.getElementById('deposit-form-card').hidden = false;
+        }
+
+        function handleNativeMessage(event) {
+          var data;
+          try {
+            data = JSON.parse(event.data);
+          } catch (error) {
+            return;
+          }
+          if (!data || data.type !== 'SESSION_INITIALIZED') {
+            return;
+          }
+          renderGoal(data.payload.goal);
+        }
+
+        // react-native-webview dispatches the native -> web message on
+        // `document` on Android and on `window` on iOS. Registering on both
+        // keeps this correct on either platform; handlers are idempotent so
+        // a duplicate delivery on the same platform is harmless.
+        document.addEventListener('message', handleNativeMessage);
+        window.addEventListener('message', handleNativeMessage);
+
+        var form = document.getElementById('deposit-form');
+        var amountInput = document.getElementById('amount-input');
+        var errorEl = document.getElementById('form-error');
+        var confirmationEl = document.getElementById('confirmation');
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+          errorEl.hidden = true;
+          confirmationEl.hidden = true;
+
+          if (!currentGoal) {
+            return;
+          }
+
+          var raw = amountInput.value.trim();
+          if (raw === '') {
+            errorEl.textContent = 'Ingresa un monto.';
+            errorEl.hidden = false;
+            return;
+          }
+
+          var amount = Number(raw);
+          if (!Number.isInteger(amount) || amount <= 0) {
+            errorEl.textContent = 'El monto debe ser un entero mayor que cero.';
+            errorEl.hidden = false;
+            return;
+          }
+
+          postToNative({
+            type: 'DEPOSIT_CONFIRMED',
+            payload: { goalId: currentGoal.id, amount: amount },
+          });
+
+          confirmationEl.textContent = 'Abono enviado: ' + formatCOP(amount);
+          confirmationEl.hidden = false;
+          amountInput.value = '';
+        });
+
+        // Announce readiness only after both listeners above are attached —
+        // this handshake is what closes the SESSION_INITIALIZED race: the
+        // native side replies only once it hears WEB_APP_READY, so the
+        // reply can never arrive before this page is listening for it.
+        postToNative({ type: 'WEB_APP_READY' });
+      })();
+    </script>
+  </body>
+</html>

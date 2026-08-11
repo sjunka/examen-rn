@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { GoalRow } from './GoalRow';
 
 describe('GoalRow', () => {
@@ -25,5 +25,15 @@ describe('GoalRow', () => {
     );
 
     expect(screen.getByText('100%')).toBeTruthy();
+  });
+
+  it('calls onPress with the goal id when tapped', async () => {
+    const onPress = jest.fn();
+    const goal = { id: '3', name: 'Laptop nueva', targetAmount: 4_500_000, accumulatedAmount: 4_500_000 };
+    await render(<GoalRow goal={goal} onPress={onPress} />);
+
+    fireEvent.press(screen.getByTestId('goal-row'));
+
+    expect(onPress).toHaveBeenCalledWith('3');
   });
 });
