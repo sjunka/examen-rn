@@ -2,25 +2,10 @@ import { useCallback, useRef } from 'react';
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import WebView, { type WebViewMessageEvent } from 'react-native-webview';
 import { webAppSource } from '../../infrastructure/webAppHtml';
-import type { NativeToWebMessage } from '../../infrastructure/webMessages';
+import { parseWebToNativeMessage, type NativeToWebMessage } from '../../infrastructure/webMessages';
+import { useConfirmDeposit } from '../useConfirmDeposit';
 import { useGoalSnapshot } from '../useGoalSnapshot';
 import { colors, spacing, typography } from '../theme';
-
-// Only this one inbound message is acted on here: the handshake. Whether a
-// DEPOSIT_CONFIRMED message arrived is not this ticket's concern — this
-// slice delivers the channel and the detail, not the deposit (HU3).
-function isWebAppReady(raw: string): boolean {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    return (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      (parsed as { type?: unknown }).type === 'WEB_APP_READY'
-    );
-  } catch {
-    return false;
-  }
-}
 
 export function GoalDetailScreen({
   goalId,
@@ -30,30 +15,48 @@ export function GoalDetailScreen({
   onBack: () => void;
 }) {
   const goal = useGoalSnapshot(goalId);
+  const confirmDeposit = useConfirmDeposit();
   // Explicit `{}` type arg: react-native-webview's WebView<P = undefined>
   // makes TS infer `never` for props otherwise (WebViewProps & undefined).
   const webViewRef = useRef<WebView<{}>>(null);
 
-  // The web announces readiness first; only then does native reply with the
-  // session. That ordering — not a delay on this side — is what closes the
-  // race, so this handler never needs to guess when the page is "loaded".
+  // parseWebToNativeMessage is the only thing here that knows the raw wire
+  // format — everything past it works with the typed union.
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {
-      if (!goal || !isWebAppReady(event.nativeEvent.data)) {
+      const message = parseWebToNativeMessage(event.nativeEvent.data);
+      if (!message) {
         return;
       }
 
-      const sessionMessage: NativeToWebMessage = {
-        type: 'SESSION_INITIALIZED',
-        payload: {
-          sessionId: `session-${goal.id}`,
-          userInfo: { name: 'Ahorrador Demo' },
-          goal,
-        },
-      };
-      webViewRef.current?.postMessage(JSON.stringify(sessionMessage));
+      if (message.type === 'WEB_APP_READY') {
+        // The web announces readiness first; only then does native reply
+        // with the session. That ordering — not a delay on this side — is
+        // what closes the race, so this branch never needs to guess when
+        // the page is "loaded".
+        if (!goal) {
+          return;
+        }
+        const sessionMessage: NativeToWebMessage = {
+          type: 'SESSION_INITIALIZED',
+          payload: {
+            sessionId: `session-${goal.id}`,
+            userInfo: { name: 'Ahorrador Demo' },
+            goal,
+          },
+        };
+        webViewRef.current?.postMessage(JSON.stringify(sessionMessage));
+        return;
+      }
+
+      // DEPOSIT_CONFIRMED: dispatched through the use case, never straight
+      // into Redux. A non-existent goal id is a no-op — confirmDeposit
+      // leaves global state untouched. GoalsScreen re-renders on its own
+      // subscription; this screen deliberately doesn't, so the WebView
+      // never remounts.
+      confirmDeposit(message.payload.goalId, message.payload.amount);
     },
-    [goal],
+    [goal, confirmDeposit],
   );
 
   return (

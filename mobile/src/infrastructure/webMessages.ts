@@ -1,4 +1,4 @@
-import type { SavingsGoal } from '../domain';
+import { isValidAmount, type SavingsGoal } from '../domain';
 
 // Single shared module for the WebView <-> native message contract, as
 // discriminated unions so a missing case fails to typecheck. web/index.html
@@ -21,3 +21,46 @@ export type NativeToWebMessage = {
     goal: SavingsGoal;
   };
 };
+
+// The one place that knows the raw wire format. Never throws — an
+// unparseable or malformed message resolves to null instead, so every
+// caller gets a typed WebToNativeMessage or nothing. Shape validation only:
+// whether a goal with this id exists is a business question for the use
+// case, not this parser.
+export function parseWebToNativeMessage(raw: string): WebToNativeMessage | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return null;
+  }
+
+  const { type } = parsed as { type?: unknown };
+
+  if (type === 'WEB_APP_READY') {
+    return { type: 'WEB_APP_READY' };
+  }
+
+  if (type === 'DEPOSIT_CONFIRMED') {
+    const { payload } = parsed as { payload?: unknown };
+    if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+      return null;
+    }
+
+    const { goalId, amount } = payload as { goalId?: unknown; amount?: unknown };
+    if (typeof goalId !== 'string' || goalId === '') {
+      return null;
+    }
+    if (typeof amount !== 'number' || !isValidAmount(amount)) {
+      return null;
+    }
+
+    return { type: 'DEPOSIT_CONFIRMED', payload: { goalId, amount } };
+  }
+
+  return null;
+}
