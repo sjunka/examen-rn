@@ -3,7 +3,7 @@ import { GoalRow } from '../components/GoalRow';
 import { useGoals } from '../useGoals';
 import { colors, spacing, typography } from '../theme';
 
-export function GoalsScreen() {
+export function GoalsScreen({ onSelectGoal }: { onSelectGoal: (goalId: string) => void }) {
   const goals = useGoals();
 
   return (
@@ -14,7 +14,7 @@ export function GoalsScreen() {
       <FlatList
         data={goals}
         keyExtractor={goal => goal.id}
-        renderItem={({ item }) => <GoalRow goal={item} />}
+        renderItem={({ item }) => <GoalRow goal={item} onPress={onSelectGoal} />}
         contentContainerStyle={styles.list}
       />
     </SafeAreaView>

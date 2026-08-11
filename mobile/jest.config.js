@@ -3,7 +3,7 @@ module.exports = {
   // Redux Toolkit and its dependencies ship ESM in node_modules; the RN
   // preset only transforms RN packages by default, so extend the pattern.
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@reduxjs/toolkit|react-redux|immer|reselect|use-sync-external-store)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@reduxjs/toolkit|react-redux|immer|reselect|use-sync-external-store|react-native-webview)/)',
   ],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.test.{ts,tsx}'],
   coverageThreshold: {

@@ -1,15 +1,27 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { Pressable, View, Text, StyleSheet } from 'react-native';
 import { calculateProgress, formatCOP, type SavingsGoal } from '../../domain';
 import { ProgressBar } from './ProgressBar';
 import { colors, rounded, spacing, typography } from '../theme';
 
 // Percentage always comes from calculateProgress — the single domain rule.
 // No second implementation of the calculation lives here.
-export function GoalRow({ goal }: { goal: SavingsGoal }) {
+export function GoalRow({
+  goal,
+  onPress,
+}: {
+  goal: SavingsGoal;
+  onPress?: (goalId: string) => void;
+}) {
   const percent = calculateProgress(goal.accumulatedAmount, goal.targetAmount);
 
   return (
-    <View style={styles.row} testID="goal-row">
+    <Pressable
+      style={styles.row}
+      testID="goal-row"
+      onPress={onPress ? () => onPress(goal.id) : undefined}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={`${goal.name}, ${percent}% de ${formatCOP(goal.targetAmount)}`}
+    >
       <Text style={styles.name}>{goal.name}</Text>
       <View style={styles.amounts}>
         <Text style={styles.label}>
@@ -21,7 +33,7 @@ export function GoalRow({ goal }: { goal: SavingsGoal }) {
       </View>
       <ProgressBar percent={percent} />
       <Text style={styles.percent}>{percent}%</Text>
-    </View>
+    </Pressable>
   );
 }
 
