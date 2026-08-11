@@ -8,8 +8,11 @@ import { GoalDetailScreen } from './screens/GoalDetailScreen';
 
 // End-to-end: a raw string arrives on the WebView's onMessage channel and
 // the assertion lands on what the listing renders — no shortcut through
-// Redux or the use case directly. Only two mocks exist in the whole suite:
-// react-native-webview (__mocks__) and the native module (none yet, HU4).
+// Redux or the use case directly. Two manual mocks apply to the whole
+// suite (__mocks__/): react-native-webview and rn-savings-notifier
+// (default: confirm dialog accepted, notification scheduled) — the dialog
+// gate, cancel, and notification-trigger cases are covered in
+// GoalDetailScreen.test.tsx (HU4), not duplicated here.
 const goal = {
   id: '1',
   name: 'Viaje a Cartagena',

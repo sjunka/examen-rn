@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import goalsReducer from '../../infrastructure/store/goalsSlice';
@@ -11,9 +11,10 @@ const goal = {
   accumulatedAmount: 1_500_000,
 };
 
-// __mocks__/react-native-webview.js is applied to the whole suite
-// automatically; grab its postMessage spy to assert on.
+// __mocks__/react-native-webview.js and __mocks__/rn-savings-notifier.js are
+// applied to the whole suite automatically; grab their spies to assert on.
 const { mockPostMessage } = require('react-native-webview');
+const { mockShowConfirmDialog, mockNotifyGoalCompleted } = require('rn-savings-notifier');
 
 function makeStore() {
   return configureStore({
@@ -37,6 +38,8 @@ async function sendFromWeb(message: unknown) {
 
 beforeEach(() => {
   mockPostMessage.mockClear();
+  mockShowConfirmDialog.mockClear().mockResolvedValue(true);
+  mockNotifyGoalCompleted.mockClear().mockResolvedValue(undefined);
 });
 
 describe('GoalDetailScreen', () => {
@@ -74,14 +77,28 @@ describe('GoalDetailScreen', () => {
     expect(mockPostMessage).not.toHaveBeenCalled();
   });
 
-  it('applies a valid deposit to the store without replying on the channel', async () => {
+  it('shows the native confirm dialog before applying a valid deposit, and does not reply on the channel', async () => {
     const store = makeStore();
     await renderScreen(store);
 
     await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 1000 } });
 
+    await waitFor(() =>
+      expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 1000),
+    );
+    expect(mockShowConfirmDialog).toHaveBeenCalledTimes(1);
     expect(mockPostMessage).not.toHaveBeenCalled();
-    expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 1000);
+  });
+
+  it('cancelling the confirm dialog registers no deposit and leaves the store untouched', async () => {
+    mockShowConfirmDialog.mockResolvedValue(false);
+    const store = makeStore();
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 1000 } });
+
+    await waitFor(() => expect(mockShowConfirmDialog).toHaveBeenCalledTimes(1));
+    expect(store.getState().goals.goals).toEqual([goal]);
   });
 
   it('leaves the store untouched when the deposit targets a non-existent goal', async () => {
@@ -90,16 +107,62 @@ describe('GoalDetailScreen', () => {
 
     await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: 'missing', amount: 1000 } });
 
+    await waitFor(() => expect(mockShowConfirmDialog).toHaveBeenCalledTimes(1));
     expect(store.getState().goals.goals).toEqual([goal]);
   });
 
-  it('ignores malformed deposit payloads (shape rejected before it reaches the store)', async () => {
+  it('ignores malformed deposit payloads (shape rejected before it reaches the store, and never shows the dialog)', async () => {
     const store = makeStore();
     await renderScreen(store);
 
     await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: -5 } });
 
     expect(store.getState().goals.goals).toEqual([goal]);
+    expect(mockShowConfirmDialog).not.toHaveBeenCalled();
+  });
+
+  it('notifies exactly once when a deposit completes the goal', async () => {
+    const store = configureStore({
+      reducer: { goals: goalsReducer },
+      preloadedState: {
+        goals: { goals: [{ ...goal, accumulatedAmount: 2_900_000 }], status: 'success' as const },
+      },
+    });
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 100_000 } });
+
+    await waitFor(() => expect(mockNotifyGoalCompleted).toHaveBeenCalledTimes(1));
+    expect(mockNotifyGoalCompleted).toHaveBeenCalledWith(goal.name);
+  });
+
+  it('does not notify when a deposit does not complete the goal', async () => {
+    const store = makeStore();
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 1000 } });
+
+    await waitFor(() =>
+      expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 1000),
+    );
+    expect(mockNotifyGoalCompleted).not.toHaveBeenCalled();
+  });
+
+  it('does not notify again on a further deposit to an already-completed goal', async () => {
+    const store = configureStore({
+      reducer: { goals: goalsReducer },
+      preloadedState: {
+        goals: { goals: [{ ...goal, accumulatedAmount: goal.targetAmount }], status: 'success' as const },
+      },
+    });
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 100_000 } });
+
+    await waitFor(() =>
+      expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.targetAmount + 100_000),
+    );
+    expect(mockNotifyGoalCompleted).not.toHaveBeenCalled();
   });
 
   it('calls onBack when the back control is pressed', async () => {
