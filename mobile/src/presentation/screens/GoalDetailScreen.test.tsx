@@ -15,11 +15,14 @@ const goal = {
 // automatically; grab its postMessage spy to assert on.
 const { mockPostMessage } = require('react-native-webview');
 
-function renderScreen(onBack = jest.fn()) {
-  const store = configureStore({
+function makeStore() {
+  return configureStore({
     reducer: { goals: goalsReducer },
     preloadedState: { goals: { goals: [goal], status: 'success' as const } },
   });
+}
+
+function renderScreen(store = makeStore(), onBack = jest.fn()) {
   return render(
     <Provider store={store}>
       <GoalDetailScreen goalId={goal.id} onBack={onBack} />
@@ -71,17 +74,37 @@ describe('GoalDetailScreen', () => {
     expect(mockPostMessage).not.toHaveBeenCalled();
   });
 
-  it('ignores messages of an unknown or not-yet-handled type', async () => {
-    await renderScreen();
+  it('applies a valid deposit to the store without replying on the channel', async () => {
+    const store = makeStore();
+    await renderScreen(store);
 
     await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 1000 } });
 
     expect(mockPostMessage).not.toHaveBeenCalled();
+    expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 1000);
+  });
+
+  it('leaves the store untouched when the deposit targets a non-existent goal', async () => {
+    const store = makeStore();
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: 'missing', amount: 1000 } });
+
+    expect(store.getState().goals.goals).toEqual([goal]);
+  });
+
+  it('ignores malformed deposit payloads (shape rejected before it reaches the store)', async () => {
+    const store = makeStore();
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: -5 } });
+
+    expect(store.getState().goals.goals).toEqual([goal]);
   });
 
   it('calls onBack when the back control is pressed', async () => {
     const onBack = jest.fn();
-    await renderScreen(onBack);
+    await renderScreen(makeStore(), onBack);
 
     fireEvent.press(await screen.findByTestId('goal-detail-back'));
 
@@ -89,10 +112,7 @@ describe('GoalDetailScreen', () => {
   });
 
   it('shows a not-found state instead of a WebView when the goal id does not resolve', async () => {
-    const store = configureStore({
-      reducer: { goals: goalsReducer },
-      preloadedState: { goals: { goals: [goal], status: 'success' as const } },
-    });
+    const store = makeStore();
     await render(
       <Provider store={store}>
         <GoalDetailScreen goalId="missing" onBack={jest.fn()} />
