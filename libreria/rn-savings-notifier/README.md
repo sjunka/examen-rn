@@ -173,17 +173,19 @@ botones, uno por método, con el resultado mostrado en pantalla.
 
 ## Pendientes
 
-- **`pod install` en este entorno**: el directorio del proyecto contiene un
-  espacio (`.../react native/examen-rn/...`). El descargador de binarios
-  prebuilt de React Native 0.85 (`RCTUsePrebuiltRNCore`) construye una URL
-  a partir de esa ruta y falla con `bad component (expected absolute path
-  component)` al intentar escribir el tarball de release. Es el mismo tipo
-  de fricción de toolchain que ya documenta el `README.md` raíz para RN
-  0.81 + Xcode 26.5: un choque de herramienta externa, no un error de este
-  paquete. La app de ejemplo de este paquete queda sin `Pods/` instalados
-  en este entorno por esa razón; el codegen (la parte relevante para
-  validar que el `Spec.ts` y el nativo coinciden) sí corre y se validó
-  manualmente contra el header generado.
+- ~~**`pod install` en este entorno**: el directorio del proyecto contiene un
+  espacio (`.../react native/examen-rn/...`)~~ — **resuelto.** No era el
+  espacio en la ruta: faltaba `bundle install` (las gems de CocoaPods que
+  fija el `Gemfile` del ejemplo, `cocoapods` >= 1.13 excluyendo 1.15.0/1.15.1,
+  nunca se habían instalado en este entorno, así que `bundle exec pod install`
+  abortaba antes de siquiera resolver pods). Con
+  `bundle install && bundle exec pod install` desde
+  `example/ios` corre limpio: descarga el tarball prebuilt de
+  `ReactNativeCore`/`ReactNativeDependencies` (RN 0.85) y el de Hermes sin
+  problema, genera `RnSavingsNotifierExample.xcworkspace` e instala 74 pods.
+  El codegen (la parte relevante para validar que el `Spec.ts` y el nativo
+  coinciden) ya corría y se había validado manualmente; ahora también corre
+  como parte de `pod install`.
 
 ## Contributing
 
