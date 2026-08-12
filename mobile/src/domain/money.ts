@@ -3,10 +3,12 @@ export function isValidAmount(amount: number): boolean {
   return Number.isSafeInteger(amount) && amount > 0;
 }
 
+const copFormatter = new Intl.NumberFormat('es-CO', {
+  style: 'currency',
+  currency: 'COP',
+  maximumFractionDigits: 0,
+});
+
 export function formatCOP(amount: number): string {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return copFormatter.format(amount);
 }
