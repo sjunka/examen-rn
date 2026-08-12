@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewMessageEvent } from 'react-native-webview';
 import { showConfirmDialog, notifyGoalCompleted } from 'rn-savings-notifier';
-import { formatCOP } from '../../domain';
+import { formatCOP } from '../../domain/money';
 import { webAppSource } from '../../infrastructure/webAppHtml';
 import { parseWebToNativeMessage, type NativeToWebMessage } from '../../infrastructure/webMessages';
 import { useConfirmDeposit } from '../useConfirmDeposit';

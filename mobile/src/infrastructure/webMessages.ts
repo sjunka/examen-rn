@@ -1,4 +1,5 @@
-import { isValidAmount, type SavingsGoal } from '../domain';
+import { isValidAmount } from '../domain/money';
+import type { SavingsGoal } from '../domain/savingsGoal';
 
 // Single shared module for the WebView <-> native message contract, as
 // discriminated unions so a missing case fails to typecheck. web/index.html

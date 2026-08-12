@@ -1,4 +1,4 @@
-import { isGoalCompleted } from '../domain';
+import { isGoalCompleted } from '../domain/savingsGoal';
 import type { SavingsGoalRepository } from './savingsGoalRepository';
 
 export interface ConfirmDepositResult {

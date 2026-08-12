@@ -1,11 +1,18 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { FlatList, ListRenderItem, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { SavingsGoal } from '../../domain/savingsGoal';
 import { GoalRow } from '../components/GoalRow';
 import { useGoals } from '../useGoals';
 import { colors, spacing, typography } from '../theme';
 
 export function GoalsScreen({ onSelectGoal }: { onSelectGoal: (goalId: string) => void }) {
   const goals = useGoals();
+
+  const renderGoal = useCallback<ListRenderItem<SavingsGoal>>(
+    ({ item }) => <GoalRow goal={item} onPress={onSelectGoal} />,
+    [onSelectGoal]
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -15,7 +22,7 @@ export function GoalsScreen({ onSelectGoal }: { onSelectGoal: (goalId: string) =
       <FlatList
         data={goals}
         keyExtractor={goal => goal.id}
-        renderItem={({ item }) => <GoalRow goal={item} onPress={onSelectGoal} />}
+        renderItem={renderGoal}
         contentContainerStyle={styles.list}
       />
     </SafeAreaView>

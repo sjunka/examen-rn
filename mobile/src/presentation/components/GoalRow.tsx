@@ -1,5 +1,7 @@
 import { Pressable, View, Text, StyleSheet } from 'react-native';
-import { calculateProgress, formatCOP, type SavingsGoal } from '../../domain';
+import { calculateProgress } from '../../domain/progress';
+import { formatCOP } from '../../domain/money';
+import type { SavingsGoal } from '../../domain/savingsGoal';
 import { ProgressBar } from './ProgressBar';
 import { colors, rounded, spacing, typography } from '../theme';
 
