@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { showConfirmDialog, notifyGoalCompleted } from 'rn-savings-notifier';
 
 export default function App() {
@@ -28,7 +28,9 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    // Plain View: react-native's SafeAreaView is deprecated, and this
+    // container centres its content vertically, so no inset to respect.
+    <View style={styles.container}>
       <View style={styles.row}>
         <Button title="Mostrar diálogo nativo" onPress={onShowConfirmDialog} />
         <Text style={styles.result}>{dialogResult}</Text>
@@ -40,7 +42,7 @@ export default function App() {
         />
         <Text style={styles.result}>{notificationResult}</Text>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

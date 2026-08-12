@@ -14,7 +14,7 @@ Feature "Bolsillo de Ahorro Programado": una pantalla nativa lista las metas de 
 
 ## Requisitos y versiones
 
-- Node 25.9.0
+- Node ≥ 22.11.0 (`mobile/package.json` → `engines`); probado con 25.9.0
 - React Native 0.87.0, React 19.2.3
 - iOS: Xcode 26.5, CocoaPods 1.16.2
 - Android: SDK 37 / build-tools 37.0.0, NDK 27.1.12297006, Kotlin 2.2.0, Java 17
@@ -39,6 +39,23 @@ npm run android
 ```
 
 Requiere un emulador o dispositivo Android corriendo (`adb devices` debe listarlo), Java 17 y el SDK de Android configurado (`ANDROID_HOME`). `rn-savings-notifier` trae su implementación Kotlin; el autolinking la detecta sola, sin pasos manuales.
+
+### Verificación sin simulador
+
+Todo lo evaluado (tests, tipos, lint) corre sin Xcode ni Android Studio:
+
+```sh
+cd mobile && npm install
+npm test -- --coverage && npx tsc --noEmit && npm run lint
+
+cd ../libreria/rn-savings-notifier && yarn install
+yarn test --coverage && yarn typecheck && yarn lint
+```
+
+Los umbrales de cobertura están puestos para **romper el build** si el núcleo
+se degrada, no solo para reportar una cifra — ver [Tests y coverage](#tests-y-coverage).
+Ambos paquetes puntúan además **100/100 en [react-doctor](https://react.doctor)**
+(`npx react-doctor@latest .` en cada carpeta).
 
 ## Demo
 
@@ -135,26 +152,30 @@ El payload de `SESSION_INITIALIZED` también se extiende respecto al ejemplo del
 
 `ACCUMULATED_AMOUNT_UPDATED` es otra extensión: tras un abono confirmado, el nativo notifica al WebView del nuevo acumulado. La micro-app actualiza su UI (cantidad, porcentaje, barra de progreso) sin necesidad de que `GoalDetailScreen` re-renderice y remonte el `WebView` — la sesión se mantiene intacta y el usuario ve el cambio en tiempo real.
 
+El acumulado que viaja en ese mensaje lo devuelve `ConfirmDeposit` (`accumulatedAmount` en su resultado), no la pantalla. Es deliberado y tiene test propio: `GoalDetailScreen` sostiene un snapshot de la meta congelado en el montaje (`useGoalSnapshot`, sin suscripción — ver [Observer / Pub-Sub](#observer--pub-sub)), así que sumarle el abono a mano acierta en el primer abono de la sesión y se equivoca en todos los siguientes. La única fuente del número es el caso de uso que acaba de escribirlo.
+
 La micro-app llega al WebView como HTML embebido (`source={{ html }}`), no por red: `web/index.html` es el archivo real y editable, y `npm run build:webapp` (en `mobile/`) lo empaqueta en `mobile/src/infrastructure/webAppHtml.ts`, que se commitea. Así la demo no depende de un servidor corriendo.
 
 ## Tests y coverage
 
 Dos capas evaluadas, cada una con sus propios umbrales de cobertura — configurados para fallar el build si el núcleo se degrada, no solo para reportar una cifra.
 
-**`mobile/`** (Jest + React Testing Library, 79 tests)
+**`mobile/`** (Jest + React Testing Library, 81 tests)
 
 ```sh
 cd mobile
+npm install             # requerido la primera vez
 npm test                # correr los tests
 npm test -- --coverage  # con reporte de cobertura
 ```
 
-Umbrales (`mobile/jest.config.js`): `src/domain/**` ≥ 90% y `src/application/**` ≥ 80% en statements/branches/functions/lines. Cifra real medida sobre todo `src/`: **98.23% statements, 96.22% branches, 100% functions, 98.13% lines**.
+Umbrales (`mobile/jest.config.js`): `src/domain/**` ≥ 90% y `src/application/**` ≥ 80% en statements/branches/functions/lines. Ambas capas están al **100%** en las cuatro métricas. Cifra real medida sobre todo `src/`: **98.38% statements, 96.36% branches, 100% functions, 98.30% lines**.
 
 **`libreria/rn-savings-notifier/`** (Jest, 12 tests)
 
 ```sh
 cd libreria/rn-savings-notifier
+yarn install             # requerido la primera vez
 yarn test                # correr los tests
 yarn test --coverage     # con reporte de cobertura
 ```

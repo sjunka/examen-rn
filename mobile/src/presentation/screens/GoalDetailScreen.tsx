@@ -46,12 +46,14 @@ export function GoalDetailScreen({
 
       if (result) {
         // Notify web app of updated accumulated amount without remounting
-        // the WebView — the web updates its UI inline.
-        const updatedGoal = { ...goal, accumulatedAmount: goal.accumulatedAmount + amount };
+        // the WebView — the web updates its UI inline. The figure comes from
+        // the use case, never recomputed from `goal`: that snapshot is
+        // frozen at mount, so adding to it would be right on the first
+        // deposit of a session and wrong on every one after.
         const updateMessage: NativeToWebMessage = {
           type: 'ACCUMULATED_AMOUNT_UPDATED',
           payload: {
-            accumulatedAmount: updatedGoal.accumulatedAmount,
+            accumulatedAmount: result.accumulatedAmount,
           },
         };
         webViewRef.current?.postMessage(JSON.stringify(updateMessage));
@@ -129,7 +131,7 @@ export function GoalDetailScreen({
         // tap). Surfacing this beats mounting a WebView that would wait
         // forever for a handshake reply that never comes.
         <Text style={styles.notFound} testID="goal-detail-not-found">
-          {UI_CONFIRMATION.goalsEmptyFallback}
+          {UI_CONFIRMATION.goalNotFound}
         </Text>
       )}
     </SafeAreaView>

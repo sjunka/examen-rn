@@ -138,7 +138,12 @@
       "!src/**/__tests__/**"
     ],
     "coverageThreshold": {
-      "global": { "statements": 90, "branches": 90, "functions": 90, "lines": 90 }
+      "global": {
+        "statements": 90,
+        "branches": 90,
+        "functions": 90,
+        "lines": 90
+      }
     }
   },
   "create-react-native-library": {
