@@ -1,4 +1,4 @@
-import goalsReducer, { goalsLoaded, goalUpdated, type GoalsState } from './goalsSlice';
+import goalsReducer, { goalsLoaded, goalUpdated, type GoalsState } from '../../src/infrastructure/store/goalsSlice';
 
 const baseState: GoalsState = {
   goals: [{ id: '1', name: 'A', targetAmount: 100, accumulatedAmount: 0 }],

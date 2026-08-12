@@ -1,8 +1,8 @@
 import { act, render, screen } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
-import goalsReducer, { goalUpdated } from '../../infrastructure/store/goalsSlice';
-import { GoalDetailScreen } from './GoalDetailScreen';
+import goalsReducer, { goalUpdated } from '../../../src/infrastructure/store/goalsSlice';
+import { GoalDetailScreen } from '../../../src/presentation/screens/GoalDetailScreen';
 
 // The demo trap this file exists for (#12): while the detail is open, the
 // micro-app inside the WebView must never restart — a restart blanks the

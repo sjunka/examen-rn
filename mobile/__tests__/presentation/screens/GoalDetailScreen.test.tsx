@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
-import goalsReducer from '../../infrastructure/store/goalsSlice';
-import { GoalDetailScreen } from './GoalDetailScreen';
+import goalsReducer from '../../../src/infrastructure/store/goalsSlice';
+import { GoalDetailScreen } from '../../../src/presentation/screens/GoalDetailScreen';
 
 const goal = {
   id: '1',

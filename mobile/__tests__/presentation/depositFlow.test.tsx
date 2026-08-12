@@ -2,9 +2,9 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import { useState } from 'react';
-import goalsReducer from '../infrastructure/store/goalsSlice';
-import { GoalsScreen } from './screens/GoalsScreen';
-import { GoalDetailScreen } from './screens/GoalDetailScreen';
+import goalsReducer from '../../src/infrastructure/store/goalsSlice';
+import { GoalsScreen } from '../../src/presentation/screens/GoalsScreen';
+import { GoalDetailScreen } from '../../src/presentation/screens/GoalDetailScreen';
 
 // End-to-end: a raw string arrives on the WebView's onMessage channel and
 // the assertion lands on what the listing renders — no shortcut through

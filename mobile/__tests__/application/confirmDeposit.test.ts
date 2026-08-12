@@ -1,6 +1,6 @@
-import type { SavingsGoal } from '../domain';
-import { InMemorySavingsGoalRepository } from '../infrastructure/inMemorySavingsGoalRepository';
-import { ConfirmDeposit } from './confirmDeposit';
+import type { SavingsGoal } from '../../src/domain';
+import { InMemorySavingsGoalRepository } from '../../src/infrastructure/inMemorySavingsGoalRepository';
+import { ConfirmDeposit } from '../../src/application/confirmDeposit';
 
 function makeRepository(overrides: Partial<SavingsGoal> = {}) {
   return new InMemorySavingsGoalRepository([

@@ -1,4 +1,4 @@
-import { calculateProgress } from './progress';
+import { calculateProgress } from '../../src/domain/progress';
 
 describe('calculateProgress', () => {
   it('returns 0 for 0/100', () => {

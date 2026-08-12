@@ -1,5 +1,5 @@
-import { InMemorySavingsGoalRepository } from '../infrastructure/inMemorySavingsGoalRepository';
-import { GetGoals } from './getGoals';
+import { InMemorySavingsGoalRepository } from '../../src/infrastructure/inMemorySavingsGoalRepository';
+import { GetGoals } from '../../src/application/getGoals';
 
 describe('GetGoals', () => {
   it('returns all goals from the repository it depends on', () => {

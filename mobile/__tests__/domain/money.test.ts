@@ -1,4 +1,4 @@
-import { formatCOP, isValidAmount } from './money';
+import { formatCOP, isValidAmount } from '../../src/domain/money';
 
 describe('formatCOP', () => {
   it('formats an integer as Colombian pesos', () => {
