@@ -9,7 +9,7 @@ Feature "Bolsillo de Ahorro Programado": una pantalla nativa lista las metas de 
 ## Estructura del repositorio
 
 - `web/` — micro-app web (detalle de meta + abono), renderizada en WebView.
-- `libreria/` — `rn-savings-notifier`, librería nativa (TurboModule Swift + Kotlin).
+- `libreria/` — `rn-savings-notifier`, librería nativa (TurboModule Swift + Kotlin) con diálogo de confirmación, notificaciones locales y actualización en tiempo real de cantidad acumulada en WebView.
 - `mobile/` — app React Native.
 
 ## Requisitos y versiones
@@ -77,7 +77,7 @@ flowchart TD
 - **`infrastructure/`** — implementaciones del puerto (`ReduxSavingsGoalRepository` en la app, `InMemorySavingsGoalRepository` en tests), el store de Redux y el contrato `postMessage` (`webMessages.ts`).
 - **`presentation/`** — pantallas y hooks. Compone el caso de uso con la implementación concreta del repositorio (por ejemplo `useGoals`) y es la única capa que importa `rn-savings-notifier`.
 
-`libreria/rn-savings-notifier` es un paquete aparte, sin dependencia del árbol anterior: expone dos funciones (`showConfirmDialog`, `notifyGoalCompleted`) que `mobile/` consume como cualquier dependencia de npm. `web/` es HTML/JS estático sin capas, embebido en el `WebView` y comunicado por el contrato `postMessage` documentado más abajo.
+`libreria/rn-savings-notifier` es un paquete aparte, sin dependencia del árbol anterior: expone dos funciones (`showConfirmDialog`, `notifyGoalCompleted`) que `mobile/` consume como cualquier dependencia de npm. El contrato `postMessage` incluye además `ACCUMULATED_AMOUNT_UPDATED` para que la micro-app actualice su interfaz en tiempo real sin remontaje del `WebView`. `web/` es HTML/JS estático sin capas, embebido en el `WebView` y comunicado por ese contrato documentado más abajo.
 
 ## Patrones de diseño
 
