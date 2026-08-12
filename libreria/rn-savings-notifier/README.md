@@ -99,6 +99,29 @@ quiera notificaciones push no deshace ese hecho. Tratarlo como error
 obligaría a quien consume la librería a diferenciar "la meta no se cumplió"
 de "se cumplió pero no se avisó", cuando son cosas distintas.
 
+## Actualización de cantidad acumulada en tiempo real (WebView)
+
+Cuando se utiliza esta librería conjuntamente con una WebView embebida, es
+posible notificar a la aplicación web sobre cambios en la cantidad acumulada
+sin necesidad de remontajes costosos del `WebView`. Envía un mensaje al
+WebView con el tipo `ACCUMULATED_AMOUNT_UPDATED` y el nuevo valor:
+
+```ts
+import type { NativeToWebMessage } from 'rn-savings-notifier';
+
+const updateMessage: NativeToWebMessage = {
+  type: 'ACCUMULATED_AMOUNT_UPDATED',
+  payload: {
+    accumulatedAmount: newAccumulatedAmount,
+  },
+};
+webViewRef.current?.postMessage(JSON.stringify(updateMessage));
+```
+
+Este mensaje permite que la web actualice su interfaz en tiempo real (por
+ejemplo, barras de progreso, montos totales) de manera sincrónica, mejorando
+la experiencia del usuario al evitar recargas visibles de contenido.
+
 ## Ejemplo de uso
 
 ```tsx
