@@ -4,11 +4,11 @@
 
 ## Platform
 
-ios
+ios, android
 
 ## Stack
 
-React Native 0.81 + React 19, creado con `npx @react-native-community/cli init` (Expo prohibido por el examen). TypeScript estricto, Redux Toolkit, react-native-webview. Monorepo `web/` + `libreria/` + `mobile/`. Librería nativa con react-native-builder-bob, TurboModule en Swift (iOS es la plataforma de demo; Android queda documentado como pendiente). Micro-app web: HTML/JS estático.
+React Native 0.87.0 + React 19.2.3, creado con `npx @react-native-community/cli init` (Expo prohibido por el examen; el desvío desde 0.81 está justificado en el README raíz). TypeScript estricto, Redux Toolkit, react-native-webview. Monorepo `web/` + `libreria/` + `mobile/`. Librería nativa con react-native-builder-bob, TurboModule con implementación real en Swift (iOS) y Kotlin (Android). Micro-app web: HTML/JS estático.
 
 ## Users
 
@@ -20,14 +20,14 @@ Feature "Bolsillo de Ahorro Programado": listado nativo de metas de ahorro con p
 
 ## Operating Context
 
-Entrega en repositorio GitHub público con historial de commits incremental. Demo en vivo en simulador iOS. Sin backend real: datos en memoria / repositorio simulado. Comunicación web ↔ nativo exclusivamente por postMessage con contrato tipado.
+Entrega en repositorio GitHub público con historial de commits incremental. Demo en vivo en simulador iOS y emulador Android. Sin backend real: datos en memoria / repositorio simulado. Comunicación web ↔ nativo exclusivamente por postMessage con contrato tipado.
 
 ## Capabilities and Constraints
 
 - HU1 listado de metas (nombre, objetivo, acumulado, % progreso) en pantalla nativa con Redux.
 - HU2 detalle + abono en WebView (micro-app web).
 - HU3 abono confirmado en web actualiza Redux sin recargar.
-- HU4 (deseable) notificación local nativa al completar meta: `notifyGoalCompleted(goalName: string)` vía TurboModule Swift.
+- HU4 (deseable, implementada) diálogo de confirmación nativo y notificación local al completar meta: `showConfirmDialog(title, message)` y `notifyGoalCompleted(goalName: string)` vía TurboModule, en Swift y Kotlin.
 - Arquitectura DDD ligero (domain/application/infrastructure/presentation) + patrones Adapter y Repository, nombrados en código y README.
 - Tests obligatorios en `libreria/` y `mobile/` (Jest + RNTL); coverage del core documentado (meta ≥70% dominio).
 - Uso de IA obligatorio y documentado: ≥1 skill, ≥1 agent, `docs/ia/USO_IA.md`.

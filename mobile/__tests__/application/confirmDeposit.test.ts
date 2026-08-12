@@ -14,7 +14,7 @@ describe('ConfirmDeposit', () => {
 
     const result = new ConfirmDeposit(repository).execute('1', 300_000);
 
-    expect(result).toEqual({ justCompleted: false });
+    expect(result).toEqual({ justCompleted: false, accumulatedAmount: 500_000 });
     expect(repository.findById('1')).toEqual(
       expect.objectContaining({ accumulatedAmount: 500_000 }),
     );
@@ -46,7 +46,7 @@ describe('ConfirmDeposit', () => {
 
     const result = new ConfirmDeposit(repository).execute('1', 100_000);
 
-    expect(result).toEqual({ justCompleted: true });
+    expect(result).toEqual({ justCompleted: true, accumulatedAmount: 1_000_000 });
   });
 
   it('reports justCompleted false when the goal was already complete before this deposit', () => {
@@ -54,6 +54,6 @@ describe('ConfirmDeposit', () => {
 
     const result = new ConfirmDeposit(repository).execute('1', 50_000);
 
-    expect(result).toEqual({ justCompleted: false });
+    expect(result).toEqual({ justCompleted: false, accumulatedAmount: 1_050_000 });
   });
 });

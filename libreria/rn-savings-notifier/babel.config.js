@@ -6,7 +6,14 @@ module.exports = {
     },
     {
       include: /\/node_modules\//,
-      presets: ['module:@react-native/babel-preset'],
+      // enableBabelRuntime pinned to the installed @babel/runtime so helpers
+      // are imported once instead of inlined into every transformed file.
+      presets: [
+        [
+          'module:@react-native/babel-preset',
+          { enableBabelRuntime: '^7.25.0' },
+        ],
+      ],
     },
   ],
 };

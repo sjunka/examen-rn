@@ -19,7 +19,7 @@ android/local.properties
 *.hprof
 
 # react-native-builder-bob output (libreria/)
-libreria/lib/
+libreria/rn-savings-notifier/lib/
 
 # Test coverage
 coverage/

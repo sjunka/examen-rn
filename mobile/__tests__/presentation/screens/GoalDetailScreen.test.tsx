@@ -95,6 +95,25 @@ describe('GoalDetailScreen', () => {
     );
   });
 
+  it('reports the real accumulated amount on a second deposit, not the mount-time snapshot', async () => {
+    const store = makeStore();
+    await renderScreen(store);
+
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 1000 } });
+    await waitFor(() =>
+      expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 1000),
+    );
+    await sendFromWeb({ type: 'DEPOSIT_CONFIRMED', payload: { goalId: goal.id, amount: 2000 } });
+    await waitFor(() =>
+      expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 3000),
+    );
+
+    expect(JSON.parse(mockPostMessage.mock.calls.at(-1)[0])).toEqual({
+      type: 'ACCUMULATED_AMOUNT_UPDATED',
+      payload: { accumulatedAmount: goal.accumulatedAmount + 3000 },
+    });
+  });
+
   it('cancelling the confirm dialog registers no deposit and leaves the store untouched', async () => {
     mockShowConfirmDialog.mockResolvedValue(false);
     const store = makeStore();
