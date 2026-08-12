@@ -218,6 +218,17 @@
           document.getElementById('deposit-form-card').hidden = false;
         }
 
+        function updateAccumulatedAmount(accumulatedAmount) {
+          if (!currentGoal) {
+            return;
+          }
+          currentGoal.accumulatedAmount = accumulatedAmount;
+          document.getElementById('goal-accumulated').textContent = formatCOP(accumulatedAmount);
+          var percent = calculateProgress(accumulatedAmount, currentGoal.targetAmount);
+          document.getElementById('goal-percent').textContent = percent + '%';
+          document.getElementById('progress-fill').style.width = percent + '%';
+        }
+
         function handleNativeMessage(event) {
           var data;
           try {
@@ -225,10 +236,17 @@
           } catch (error) {
             return;
           }
-          if (!data || data.type !== 'SESSION_INITIALIZED') {
+          if (!data) {
             return;
           }
-          renderGoal(data.payload.goal);
+          if (data.type === 'SESSION_INITIALIZED') {
+            renderGoal(data.payload.goal);
+            return;
+          }
+          if (data.type === 'ACCUMULATED_AMOUNT_UPDATED') {
+            updateAccumulatedAmount(data.payload.accumulatedAmount);
+            return;
+          }
         }
 
         // react-native-webview dispatches the native -> web message on

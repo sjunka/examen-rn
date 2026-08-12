@@ -14,14 +14,21 @@ export type WebToNativeMessage =
 // carry a goal snapshot: without it the web receives an id but nothing to
 // render the detail with, and HU2 can't be satisfied. Documented in the
 // README catalog as a legitimate, deliberate extension.
-export type NativeToWebMessage = {
-  type: 'SESSION_INITIALIZED';
-  payload: {
-    sessionId: string;
-    userInfo: { name: string };
-    goal: SavingsGoal;
-  };
-};
+export type NativeToWebMessage =
+  | {
+      type: 'SESSION_INITIALIZED';
+      payload: {
+        sessionId: string;
+        userInfo: { name: string };
+        goal: SavingsGoal;
+      };
+    }
+  | {
+      type: 'ACCUMULATED_AMOUNT_UPDATED';
+      payload: {
+        accumulatedAmount: number;
+      };
+    };
 
 // The one place that knows the raw wire format. Never throws — an
 // unparseable or malformed message resolves to null instead, so every
