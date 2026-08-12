@@ -1,5 +1,5 @@
-import type { RootState } from './store';
-import { selectGoalById, selectGoals } from './selectors';
+import type { RootState } from '../../src/infrastructure/store/store';
+import { selectGoalById, selectGoals } from '../../src/infrastructure/store/selectors';
 
 const state = {
   goals: {

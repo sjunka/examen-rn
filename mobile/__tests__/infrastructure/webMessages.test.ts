@@ -1,4 +1,4 @@
-import { parseWebToNativeMessage } from './webMessages';
+import { parseWebToNativeMessage } from '../../src/infrastructure/webMessages';
 
 describe('parseWebToNativeMessage', () => {
   it('parses a valid WEB_APP_READY message', () => {

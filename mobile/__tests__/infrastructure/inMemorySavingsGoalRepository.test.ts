@@ -1,4 +1,4 @@
-import { InMemorySavingsGoalRepository } from './inMemorySavingsGoalRepository';
+import { InMemorySavingsGoalRepository } from '../../src/infrastructure/inMemorySavingsGoalRepository';
 
 describe('InMemorySavingsGoalRepository', () => {
   it('findAll returns every goal it was seeded with', () => {

@@ -1,5 +1,5 @@
-import { calculateProgress } from './progress';
-import { isGoalCompleted, type SavingsGoal } from './savingsGoal';
+import { calculateProgress } from '../../src/domain/progress';
+import { isGoalCompleted, type SavingsGoal } from '../../src/domain/savingsGoal';
 
 function makeGoal(overrides: Partial<SavingsGoal> = {}): SavingsGoal {
   return {

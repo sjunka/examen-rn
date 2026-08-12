@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { GoalRow } from './GoalRow';
+import { GoalRow } from '../../../src/presentation/components/GoalRow';
 
 describe('GoalRow', () => {
   it('shows name, formatted amounts and the derived percentage', async () => {

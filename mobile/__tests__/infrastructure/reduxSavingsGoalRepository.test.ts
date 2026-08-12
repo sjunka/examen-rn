@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import goalsReducer, { type GoalsState } from './store/goalsSlice';
-import { ReduxSavingsGoalRepository } from './reduxSavingsGoalRepository';
+import goalsReducer, { type GoalsState } from '../../src/infrastructure/store/goalsSlice';
+import { ReduxSavingsGoalRepository } from '../../src/infrastructure/reduxSavingsGoalRepository';
 
 function makeStore(initialGoals: GoalsState['goals']) {
   return configureStore({
