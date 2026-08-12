@@ -42,22 +42,30 @@ Requiere un emulador o dispositivo Android corriendo (`adb devices` debe listarl
 
 ## Demo
 
-Las 4 HUs (listado con progreso, detalle + abono en WebView, diálogo de
-confirmación, actualización sin recargar) corriendo en `mobile/` sobre
-simulador/emulador real:
+El mismo recorrido en las dos plataformas, grabado sobre simulador iOS y
+emulador Android: listado con progreso (HU1), detalle y abono en el WebView
+(HU2), diálogo nativo de confirmación (HU4), acumulado que se actualiza sin
+recargar la vista (HU3) y, al completar "Fondo de emergencia", la notificación
+local (HU4).
 
 <p align="center">
-  <img src="mobile/docs/media/demo-android.gif" width="260" alt="Demo Android: listado de metas, abono a Viaje a Cartagena y diálogo de confirmación" />
-  <img src="mobile/docs/media/demo-ios.gif" width="260" alt="Demo iOS: listado de metas y detalle de Viaje a Cartagena" />
+  <img src="mobile/docs/media/demo-ios.gif" width="280" alt="Demo iOS: listado de metas, abono de $250.000 a Viaje a Cartagena, diálogo nativo, progreso actualizado a 50% y notificación de meta cumplida" />
+  <img src="mobile/docs/media/demo-android.gif" width="280" alt="Demo Android: listado de metas, abono de $250.000 a Viaje a Cartagena, diálogo nativo, progreso actualizado a 50% y notificación de meta cumplida" />
 </p>
 
-> ¿Prefieres video? [Android (MP4)](mobile/docs/media/demo-android.mp4) ·
-> [iOS (MP4)](mobile/docs/media/demo-ios.mp4)
+> iOS a la izquierda, Android a la derecha. ¿Prefieres video?
+> [iOS (MP4)](mobile/docs/media/demo-ios.mp4) ·
+> [Android (MP4)](mobile/docs/media/demo-android.mp4)
 
-| | Listado | Detalle / abono |
-|---|---|---|
-| **Android** | <img src="mobile/docs/media/screenshot-android-list.png" width="220" alt="Listado de metas en Android" /> | <img src="mobile/docs/media/screenshot-android-detail.png" width="220" alt="Detalle y abono en Android" /> |
-| **iOS** | <img src="mobile/docs/media/screenshot-ios-list.png" width="220" alt="Listado de metas en iOS" /> | <img src="mobile/docs/media/screenshot-ios-detail.png" width="220" alt="Detalle y abono en iOS" /> |
+### Paso a paso
+
+| | Listado (HU1) | Detalle + abono (HU2) | Diálogo nativo (HU4) | Acumulado al día (HU3) | Notificación local (HU4) |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **iOS** | <img src="mobile/docs/media/screenshot-ios-list.png" width="150" alt="Listado de metas con progreso en iOS" /> | <img src="mobile/docs/media/screenshot-ios-detail.png" width="150" alt="Detalle de Viaje a Cartagena y formulario de abono en iOS" /> | <img src="mobile/docs/media/screenshot-ios-dialog.png" width="150" alt="Diálogo nativo de confirmación de abono en iOS" /> | <img src="mobile/docs/media/screenshot-ios-updated.png" width="150" alt="Acumulado de $1.500.000 y 50% tras el abono en iOS" /> | <img src="mobile/docs/media/screenshot-ios-notif.png" width="150" alt="Notificación Meta cumplida en iOS" /> |
+| **Android** | <img src="mobile/docs/media/screenshot-android-list.png" width="150" alt="Listado de metas con progreso en Android" /> | <img src="mobile/docs/media/screenshot-android-detail.png" width="150" alt="Detalle de Viaje a Cartagena y formulario de abono en Android" /> | <img src="mobile/docs/media/screenshot-android-dialog.png" width="150" alt="Diálogo nativo de confirmación de abono en Android" /> | <img src="mobile/docs/media/screenshot-android-updated.png" width="150" alt="Acumulado de $1.500.000 y 50% tras el abono en Android" /> | <img src="mobile/docs/media/screenshot-android-notif.png" width="150" alt="Notificación Meta cumplida en Android" /> |
+
+Fila de arriba iOS (iPhone 17 Pro, iOS 26.5), fila de abajo Android (API 36).
+Las capturas son de pantalla completa, sin recortes.
 
 ## Arquitectura
 
