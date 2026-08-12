@@ -4,6 +4,7 @@ import { formatCOP } from '../../domain/money';
 import type { SavingsGoal } from '../../domain/savingsGoal';
 import { ProgressBar } from './ProgressBar';
 import { colors, rounded, spacing, typography } from '../theme';
+import { UI_BORDERS } from '../constants';
 
 // Percentage always comes from calculateProgress — the single domain rule.
 // No second implementation of the calculation lives here.
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
   row: {
     backgroundColor: colors.platinum,
     borderRadius: rounded.sm,
-    borderWidth: 1,
+    borderWidth: UI_BORDERS.width,
     borderColor: colors.chromeIndigo,
     padding: spacing.md,
     marginBottom: spacing.sm,

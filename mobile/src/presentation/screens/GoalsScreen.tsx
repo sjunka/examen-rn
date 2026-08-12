@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
-import { FlatList, ListRenderItem, StyleSheet, Text, View } from 'react-native';
+import { FlatList, type ListRenderItem, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { SavingsGoal } from '../../domain/savingsGoal';
 import { GoalRow } from '../components/GoalRow';
 import { useGoals } from '../useGoals';
 import { colors, spacing, typography } from '../theme';
+import { UI_FONT_SIZES } from '../constants';
 
 export function GoalsScreen({ onSelectGoal }: { onSelectGoal: (goalId: string) => void }) {
   const goals = useGoals();
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.uiLabel,
     color: colors.onPrimary,
-    fontSize: 13,
+    fontSize: UI_FONT_SIZES.heading,
   },
   list: {
     padding: spacing.lg,

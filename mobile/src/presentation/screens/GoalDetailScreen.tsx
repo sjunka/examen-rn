@@ -9,6 +9,7 @@ import { parseWebToNativeMessage, type NativeToWebMessage } from '../../infrastr
 import { useConfirmDeposit } from '../useConfirmDeposit';
 import { useGoalSnapshot } from '../useGoalSnapshot';
 import { colors, spacing, typography } from '../theme';
+import { UI_FONT_SIZES, UI_CONFIRMATION, SESSION_ID_PREFIX, DEMO_USER_NAME } from '../constants';
 
 export function GoalDetailScreen({
   goalId,
@@ -34,7 +35,7 @@ export function GoalDetailScreen({
         return;
       }
       const accepted = await showConfirmDialog(
-        '¿Confirmar abono?',
+        UI_CONFIRMATION.confirmationTitle,
         `Se abonará ${formatCOP(amount)} a "${goal.name}".`,
       );
       if (!accepted) {
@@ -87,8 +88,8 @@ export function GoalDetailScreen({
         const sessionMessage: NativeToWebMessage = {
           type: 'SESSION_INITIALIZED',
           payload: {
-            sessionId: `session-${goal.id}`,
-            userInfo: { name: 'Ahorrador Demo' },
+            sessionId: `${SESSION_ID_PREFIX}${goal.id}`,
+            userInfo: { name: DEMO_USER_NAME },
             goal,
           },
         };
@@ -110,9 +111,9 @@ export function GoalDetailScreen({
           onPress={onBack}
           testID="goal-detail-back"
           accessibilityRole="button"
-          accessibilityLabel="Volver al listado de metas"
+          accessibilityLabel={UI_CONFIRMATION.backLabelA11y}
         >
-          <Text style={styles.backLabel}>‹ Volver</Text>
+          <Text style={styles.backLabel}>{UI_CONFIRMATION.backLabel}</Text>
         </Pressable>
       </View>
       {goal ? (
@@ -128,7 +129,7 @@ export function GoalDetailScreen({
         // tap). Surfacing this beats mounting a WebView that would wait
         // forever for a handshake reply that never comes.
         <Text style={styles.notFound} testID="goal-detail-not-found">
-          Esta meta ya no existe.
+          {UI_CONFIRMATION.goalsEmptyFallback}
         </Text>
       )}
     </SafeAreaView>
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   backLabel: {
     ...typography.uiLabel,
     color: colors.onPrimary,
-    fontSize: 13,
+    fontSize: UI_FONT_SIZES.heading,
   },
   webview: {
     flex: 1,
