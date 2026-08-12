@@ -42,12 +42,26 @@ export function GoalDetailScreen({
       }
 
       const result = confirmDeposit(depositGoalId, amount);
-      // The domain's transition rule (isGoalCompleted comparing raw
-      // amounts, via justCompleted) decides the trigger, not the rounded
-      // percentage — and only fires on the deposit that crosses the line,
-      // never again on a later deposit to an already-complete goal.
-      if (result?.justCompleted) {
-        await notifyGoalCompleted(goal.name);
+
+      if (result) {
+        // Notify web app of updated accumulated amount without remounting
+        // the WebView — the web updates its UI inline.
+        const updatedGoal = { ...goal, accumulatedAmount: goal.accumulatedAmount + amount };
+        const updateMessage: NativeToWebMessage = {
+          type: 'ACCUMULATED_AMOUNT_UPDATED',
+          payload: {
+            accumulatedAmount: updatedGoal.accumulatedAmount,
+          },
+        };
+        webViewRef.current?.postMessage(JSON.stringify(updateMessage));
+
+        // The domain's transition rule (isGoalCompleted comparing raw
+        // amounts, via justCompleted) decides the trigger, not the rounded
+        // percentage — and only fires on the deposit that crosses the line,
+        // never again on a later deposit to an already-complete goal.
+        if (result.justCompleted) {
+          await notifyGoalCompleted(goal.name);
+        }
       }
     },
     [goal, confirmDeposit],

@@ -77,7 +77,7 @@ describe('GoalDetailScreen', () => {
     expect(mockPostMessage).not.toHaveBeenCalled();
   });
 
-  it('shows the native confirm dialog before applying a valid deposit, and does not reply on the channel', async () => {
+  it('shows the native confirm dialog, updates Redux, and notifies the web of the new accumulated amount', async () => {
     const store = makeStore();
     await renderScreen(store);
 
@@ -87,7 +87,12 @@ describe('GoalDetailScreen', () => {
       expect(store.getState().goals.goals[0].accumulatedAmount).toBe(goal.accumulatedAmount + 1000),
     );
     expect(mockShowConfirmDialog).toHaveBeenCalledTimes(1);
-    expect(mockPostMessage).not.toHaveBeenCalled();
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      JSON.stringify({
+        type: 'ACCUMULATED_AMOUNT_UPDATED',
+        payload: { accumulatedAmount: goal.accumulatedAmount + 1000 },
+      }),
+    );
   });
 
   it('cancelling the confirm dialog registers no deposit and leaves the store untouched', async () => {
