@@ -119,10 +119,13 @@ Definido en `mobile/src/infrastructure/webMessages.ts` como uniones discriminada
 | `type` | payload | Cuándo |
 |---|---|---|
 | `SESSION_INITIALIZED` | `{ sessionId: string; userInfo: { name: string }; goal: SavingsGoal }` | Respuesta al `WEB_APP_READY`, nunca antes. |
+| `ACCUMULATED_AMOUNT_UPDATED` | `{ accumulatedAmount: number }` | Después de confirmar un abono válido, para que la micro-app actualice su UI sin remontarse. |
 
 `WEB_APP_READY` no está en el ejemplo del examen: se agregó porque responder en `onLoadEnd` es una carrera — el documento puede terminar de cargar antes de que el script registre su listener, y el mensaje inicial se pierde de forma intermitente. Con el handshake la web controla el orden: registra el listener, anuncia que está lista, y solo entonces el nativo responde. La carrera desaparece por construcción, no se mitiga con un delay.
 
 El payload de `SESSION_INITIALIZED` también se extiende respecto al ejemplo del examen: agrega `goal`, un snapshot de la meta tocada (`SavingsGoal` del dominio). Sin eso la web recibe un identificador de sesión pero nada con qué pintar el detalle.
+
+`ACCUMULATED_AMOUNT_UPDATED` es otra extensión: tras un abono confirmado, el nativo notifica al WebView del nuevo acumulado. La micro-app actualiza su UI (cantidad, porcentaje, barra de progreso) sin necesidad de que `GoalDetailScreen` re-renderice y remonte el `WebView` — la sesión se mantiene intacta y el usuario ve el cambio en tiempo real.
 
 La micro-app llega al WebView como HTML embebido (`source={{ html }}`), no por red: `web/index.html` es el archivo real y editable, y `npm run build:webapp` (en `mobile/`) lo empaqueta en `mobile/src/infrastructure/webAppHtml.ts`, que se commitea. Así la demo no depende de un servidor corriendo.
 
